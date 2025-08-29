@@ -10,8 +10,8 @@ export default async function handler(req, res) {
         }
       );
 
-      // Optional: get response data from n8n
       const data = await response.json().catch(() => ({}));
+
       res.status(200).json({ success: true, data });
     } catch (error) {
       console.error(error);
