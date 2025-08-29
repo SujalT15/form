@@ -30,7 +30,8 @@ function App() {
         }
       );
       if (response.ok) {
-        alert("Enquiry submitted successfully!");
+       alert("Enquiry submitted successfully! Kindly check your email, especially the spam folder.");
+
         setFormData({
           fullName: "",
           email: "",
