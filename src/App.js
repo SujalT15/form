@@ -1,21 +1,22 @@
 const handleSubmit = async (e) => {
   e.preventDefault();
+
   try {
-
-    const webhookUrl =
-      "https://sujalt.app.n8n.cloud/webhook-test/2f2f7d1f-0b93-4199-bc27-0c8ed259b34f";
-
-   
+    const webhookUrl = "https://sujalt.app.n8n.cloud/webhook-test/dc14ae43-a235-4354-878e-059fda4596dd";
 
     const response = await fetch(webhookUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(formData),
     });
 
     if (response.ok) {
+      const result = await response.json().catch(() => null);
       alert(
-        "Enquiry submitted successfully! Kindly check your email, especially the spam folder."
+        result?.message ||
+        "Enquiry submitted successfully! Please check your email (including spam)."
       );
 
       setFormData({
@@ -29,7 +30,8 @@ const handleSubmit = async (e) => {
         budget: "",
       });
     } else {
-      alert("Submission failed, please try again.");
+      const errorText = await response.text().catch(() => "");
+      alert(`Submission failed${errorText ? ": " + errorText : ""}`);
     }
   } catch (error) {
     alert("Error submitting form: " + error.message);
