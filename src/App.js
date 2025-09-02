@@ -1,116 +1,96 @@
-import React, { useState } from "react";
-import "./style.css";
+import { useState } from "react";
 
-function App() {
+export default function App() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
-    propertyType: "",
-    country: "",
-    city: "",
-    timeline: "",
-    budget: ""
+    message: ""
   });
 
-  const [successMessage, setSuccessMessage] = useState("");
+  const [status, setStatus] = useState("");
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus("Sending...");
 
     try {
-      // Call Vercel serverless function instead of n8n directly
-      const response = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        "https://xclusive.app.n8n.cloud/webhook/a7c3ea56-c173-4d1c-97d1-449998ea63e5", // ✅ Production Webhook
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        }
+      );
 
-      const data = await response.json();
-
-      if (data.success) {
-        setSuccessMessage("✅ Thank you! Your enquiry has been submitted successfully.");
-
-        // Reset form
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          propertyType: "",
-          country: "",
-          city: "",
-          timeline: "",
-          budget: ""
-        });
-
-        // Hide message after 5 seconds
-        setTimeout(() => setSuccessMessage(""), 5000);
+      if (res.ok) {
+        setStatus("✅ Data sent successfully!");
+        setFormData({ name: "", email: "", message: "" });
       } else {
-        setSuccessMessage("❌ Something went wrong. Please try again.");
+        setStatus("❌ Failed to send data.");
       }
-
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      setSuccessMessage("❌ Something went wrong. Please try again.");
+    } catch (err) {
+      setStatus("⚠️ Error: " + err.message);
     }
   };
 
   return (
-    <div className="form-container">
-      <h1 className="form-title">Xclusive Interiors Pvt. Ltd.</h1>
-      <p className="form-subtitle">
-        Share your project details with us. We take on projects with a minimum
-        budget of <b>₹25 Lakhs</b>.
-      </p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-lg shadow-lg w-80"
+      >
+        <h2 className="text-xl font-bold mb-4">Contact Form</h2>
 
-      {successMessage && <div className="success-message">{successMessage}</div>}
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="border p-2 w-full mb-3 rounded"
+          required
+        />
 
-      <form className="enquiry-form" onSubmit={handleSubmit}>
-        <label>Full Name</label>
-        <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+        <input
+          type="email"
+          name="email"
+          placeholder="Your Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="border p-2 w-full mb-3 rounded"
+          required
+        />
 
-        <label>Email Address</label>
-        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+        <textarea
+          name="message"
+          placeholder="Your Message"
+          value={formData.message}
+          onChange={handleChange}
+          className="border p-2 w-full mb-3 rounded"
+          rows="4"
+          required
+        />
 
-        <label>Phone Number</label>
-        <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
-
-        <label>Property Type</label>
-        <select name="propertyType" value={formData.propertyType} onChange={handleChange} required>
-          <option value="">Select Property Type</option>
-          <option value="2bhk">Luxurious 2BHK</option>
-          <option value="3bhk">Luxurious 3BHK</option>
-          <option value="penthouse">Penthouse</option>
-          <option value="villa">Villa</option>
-          <option value="commercial">Commercial Space</option>
-        </select>
-
-        <label>Country</label>
-        <input type="text" name="country" value={formData.country} onChange={handleChange} required />
-
-        <label>City</label>
-        <input type="text" name="city" value={formData.city} onChange={handleChange} required />
-
-        <label>Project Timeline</label>
-        <select name="timeline" value={formData.timeline} onChange={handleChange} required>
-          <option value="">Select Timeline</option>
-          <option value="immediate">Immediate</option>
-          <option value="week">Within a Week</option>
-          <option value="month">Within a Month</option>
-          <option value="6months">6 Months</option>
-        </select>
-
-        <label>Budget</label>
-        <input type="number" name="budget" value={formData.budget} min="2500000" onChange={handleChange} required />
-
-        <button type="submit">Submit Enquiry</button>
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full"
+        >
+          Send
+        </button>
       </form>
+
+      {status && <p className="mt-4">{status}</p>}
     </div>
   );
 }
-
-export default App;
