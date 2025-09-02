@@ -1,27 +1,23 @@
-// src/submit.js
+export default async function handler(req, res) {
+  if (req.method === "POST") {
+    try {
+      const response = await fetch(
+        "https://xclusive.app.n8n.cloud/webhook-test/a7c3ea56-c173-4d1c-97d1-449998ea63e5",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(req.body),
+        }
+      );
 
-export async function submitForm(data) {
-  try {
-    const response = await fetch(
-      "https://xclusive.app.n8n.cloud/webhook-test/71501faf-1195-41b2-8ede-dce7978ee34d",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+      const data = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      res.status(200).json({ success: true, data });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, error: "Failed to send webhook" });
     }
-
-    const result = await response.json().catch(() => ({}));
-    return result;
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    return { success: false, error: error.message };
+  } else {
+    res.status(405).json({ success: false, error: "Method not allowed" });
   }
 }
-
